@@ -20,6 +20,17 @@ public class Main {
                     argsCheck(2, 2, args);
                     repo(args[1]);
                 }
+                case "list" -> {
+                    argsCheck(1, 3, args);
+                    if (args.length == 1) {
+                        list();
+                    } else if (args.length == 3) {
+                        list(args[2]);
+                    } else {
+                        throw error("Incorrect operands.");
+                    }
+
+                }
                 case "duplicate" -> {
                     argsCheck(3, 3, args);
                     duplicate(args[1],args[2]);

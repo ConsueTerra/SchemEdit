@@ -1,8 +1,8 @@
-package Interface;
+package com.schemedit.commandline;
 
-import Utils.SchemEditException;
-import static Utils.Utils.error;
-import static Utils.Core.*;
+import com.schemedit.utils.SchemEditException;
+import static com.schemedit.utils.Utils.error;
+import static com.schemedit.utils.Core.*;
 
 public class Main {
     public static void main(String[] args) {

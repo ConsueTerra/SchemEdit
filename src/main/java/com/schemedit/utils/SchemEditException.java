@@ -1,4 +1,4 @@
-package Utils;
+package com.schemedit.utils;
 /** General SchemEdit exception used to control expected errors in the program
  * result of .getMessage() is the error message to be printed.
  */

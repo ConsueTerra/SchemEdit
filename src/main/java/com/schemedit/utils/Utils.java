@@ -1,4 +1,4 @@
-package Utils;
+package com.schemedit.utils;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 

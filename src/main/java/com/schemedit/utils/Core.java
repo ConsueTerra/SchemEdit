@@ -1,4 +1,4 @@
-package Utils;
+package com.schemedit.utils;
 
 
 import me.nullicorn.nedit.NBTReader;
@@ -7,10 +7,9 @@ import me.nullicorn.nedit.type.NBTCompound;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import Utils.*;
 
-import static Utils.Utils.*;
+
+import static com.schemedit.utils.Utils.*;
 
 public class Core {
 

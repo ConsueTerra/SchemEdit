@@ -47,6 +47,10 @@ public class Main {
                     argsCheck(2, 2, args);
                     metadata(args[1]);
                 }
+                case "palette" -> {
+                    argsCheck(2, 2, args);
+                    palette(args[1]);
+                }
                 default -> throw error("No command with that name exists");
             }
         } catch (SchemEditException e) {

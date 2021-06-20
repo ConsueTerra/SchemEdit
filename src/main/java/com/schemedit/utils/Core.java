@@ -4,9 +4,14 @@ package com.schemedit.utils;
 import me.nullicorn.nedit.NBTReader;
 import me.nullicorn.nedit.NBTWriter;
 import me.nullicorn.nedit.type.NBTCompound;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 import static com.schemedit.utils.Utils.*;
@@ -45,16 +50,51 @@ public class Core {
     }
 
     public static void duplicate(String targetFileName, String newFileName) {
-        throw error("Not Implemented!");
+        File[] files = filterdFileList(REPODIR,targetFileName + SCHEMEXT);
+        if (files.length > 1) {
+            throw error("Duplicate/Variation does not support batch processing!");
+        }
+        for (File file : files) {
+            File newFile = join(REPODIR,newFileName + SCHEMEXT);
+            try {
+                FileUtils.copyFile(file,newFile);
+            } catch (IOException excp) {
+                throw new IllegalArgumentException(excp.getMessage());
+            }
+        }
     }
 
-    public static void replace(String targetFileName, String mask, String pattern) {
-        throw error("Not Implemented!");
+    public static void replace(String targetFileName, String maskShort, String patternShort) {
+        File[] files = filterdFileList(REPODIR,targetFileName + SCHEMEXT);
+        String mask = shortToLongName(maskShort);
+        String pattern = shortToLongName(patternShort);
+        int succes = 0;
+        for (File file : files) {
+            try {
+                NBTCompound schematicNBT = NBTReader.readFile(file);
+
+                NBTCompound palette = schematicNBT.getCompound("Palette");
+                if (palette.containsKey(mask)) {
+                    int oldID = (int) palette.remove(mask);
+                    palette.put(pattern,oldID);
+                    schematicNBT.replace("Palette",palette);
+                    writeSchem(schematicNBT,file);
+                    succes++;
+                } else {
+                    System.out.printf("%s does not contain %s, skipping.\n", file.getName(), maskShort);
+                }
+
+            } catch (IOException excp) {
+                throw new IllegalArgumentException(excp.getMessage());
+            }
+        }
+        System.out.printf("Processed %s files successfully.\n",succes);
     }
 
     public static void variation(String targetFileName, String newFileName, String mask,
                                  String pattern) {
-        throw error("Not Implemented!");
+        duplicate(targetFileName,newFileName);
+        replace(newFileName,mask,pattern);
     }
 
     public static void metadata(String targetFileName) {
@@ -80,6 +120,37 @@ public class Core {
         }
     }
 
+    public static void palette(String targetFileName) {
+        File[] files = filterdFileList(REPODIR,targetFileName + SCHEMEXT);
+        HashMap<String,Integer> paletteCount = new HashMap<>();
+        for (File file : files) {
+            try {
+                NBTCompound schematicNBT = NBTReader.readFile(file);
+                Set<String> pallet = schematicNBT.getCompound("Palette").keySet();
+                for (String block : pallet) {
+                    int oldvalue = paletteCount.getOrDefault(block,0);
+                    paletteCount.put(block,oldvalue + 1);
+                }
+            } catch (IOException excp) {
+                throw new IllegalArgumentException(excp.getMessage());
+            }
+        }
+        if (files.length == 1) {
+            System.out.println("---Palette For Schem---");
+            for (String block : paletteCount.keySet()) {
+                System.out.println(block);
+            }
+        } else if (files.length > 1) {
+            System.out.println("---Palette For Schems---");
+            System.out.println("---Block : Occurrences---");
+            for (String block : paletteCount.keySet()) {
+                System.out.printf("%s: %s\n",block,paletteCount.get(block));
+            }
+        } else {
+            System.out.println("No files selected!");
+        }
+    }
+
     public static void help() {
         String message = """
     SchemEdit is a command line program to modify spigot Schematics (1.13+) without the use of WorldEdit
@@ -99,6 +170,7 @@ public class Core {
     replace -> not implemented
     variation -> not implemented
     metadata [filter] -> displays the metadata for all schems in a given repository that match the filter
+    palette [filter] -> displays the pallet of al schems selected, with the occurrences of each block
                 """;
         System.out.println(message);
     }
@@ -129,6 +201,15 @@ public class Core {
             NBTWriter.writeToFile(settings,SETTINGS);
         } catch (IOException excp) {
             throw new IllegalArgumentException(excp.getMessage());
+        }
+    }
+
+    private static String shortToLongName(String name) {
+        int colonIndex = name.indexOf(":");
+        if (colonIndex == -1) {
+            return "minecraft:" + name;
+        } else {
+            return name;
         }
     }
 }

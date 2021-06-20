@@ -1,11 +1,9 @@
 package com.schemedit.utils;
 
+import me.nullicorn.nedit.type.NBTCompound;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -35,6 +33,18 @@ public class Utils {
      *  in case of problems. */
     static String readContentsAsString(File file) {
         return new String(readContents(file), StandardCharsets.UTF_8);
+    }
+
+    public static void writeSchem(NBTCompound schemData, File file) throws IOException{
+        file.mkdirs();
+        if (file.getParentFile().exists()) {
+            try (OutputStream fileOut = new FileOutputStream(file)) {
+                new SchematicOutputStream(fileOut,true).writeFully(schemData);
+            }
+        } else {
+            throw new FileNotFoundException("Failed to create required directories for " + file);
+        }
+
     }
 
     /* DIRECTORIES */
